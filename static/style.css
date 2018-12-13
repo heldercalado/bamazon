@@ -1,0 +1,45 @@
+* {
+    margin: 0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+.side_menu {
+    padding:5px;
+    height: 87vh;
+    overflow: auto;
+
+}
+li {
+    list-style: none;
+}
+.side_menu .btn {
+    width: 100%;
+    text-align: left;
+}
+.display_page {
+    width: 100%;
+    margin:0;
+    height: 86vh;
+    overflow: auto;
+   
+}
+
+.display_page .card {
+    height:100%;
+    width:95%;
+    overflow: hidden;
+    background-color: #340E8B;
+    border: 1px solid black;
+    margin: 15px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    padding: 5px;
+    color: #D4E4BC;
+}
+.card img{
+    margin: 5px 5px 10px 0;
+    float: left;
+    height:120px;
+    width:120px; 
+}
+
