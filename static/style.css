@@ -43,3 +43,43 @@ li {
     width:120px; 
 }
 
+#target {
+    
+    border-collapse: collapse;
+    margin-left: 10%;
+    
+    box-shadow:  0 20px 50px rgba(3, 3, 3, 0.7);
+    border-radius: 25px;
+
+}
+
+#target td, #target th {
+    border: 1px solid #ddd;
+    padding: 8px;
+   
+}
+
+#target tr:nth-child(even){
+  background-color: #598392;
+  color: #01161E;
+
+}
+#target tr:nth-child(even){
+ 
+  color: #EFF6E0;
+
+}
+
+
+
+#target tr:hover {background-color: #AEC3B0;}
+
+#target th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color:#124559;
+    color: #EFF6E0;
+    
+}
+

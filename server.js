@@ -74,7 +74,16 @@ app.get('/searchresults', function (req, res) {
       console.log("Nothing Found");
     }
   });
-  
+  app.get('/itemsmanagement', function (req, res) {
+   
+      db.connection.query('SELECT * FROM products', function (error, results, fields) {
+        if (error) throw error;
+        if (results.length > 0){
+        res.render('itemsmanagement',{results: results , err:""});
+      }
+      });   
+    
+  });
  
 
 // what port to run server on
