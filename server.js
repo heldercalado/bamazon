@@ -21,7 +21,7 @@ app.get('/', function (req, res) {
   db.connection.query("SELECT * FROM products LIMIT 10" , function (error, results, fields) {
     if (error) throw error;
     if (results.length > 0){
-      console.log(results);
+      //console.log(results);
     res.render('index',{items: results , err:""});
    
   }else {
@@ -36,7 +36,7 @@ app.get('/', function (req, res) {
 
 app.get('/searchresults', function (req, res) {
     var check = req.query.name;
-    console.log(check);
+   // console.log(check);
     if (check) {
       db.connection.query('SELECT * FROM products WHERE product_name LIKE ?',"%"+check +"%", function (error, results, fields) {
         if (error) throw error;
