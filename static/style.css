@@ -70,7 +70,13 @@ li {
 
 }
 
+i {
+    cursor: pointer;
 
+}
+i:hover {
+    border-bottom: 2px solid navy;
+}
 
 #target tr:hover {background-color: #AEC3B0;}
 
@@ -83,3 +89,12 @@ li {
     
 }
 
+textarea {
+    overflow-y: scroll;
+   
+    resize: none; /* Remove this if you want the user to resize the textarea */
+}
+
+.modal-dialog {
+    max-width: 80% !important;
+}

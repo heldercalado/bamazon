@@ -76,44 +76,39 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="formitemupdate" method="">
+                    <form id="formitemupdate" name="myform">
 
                         <div class="form-group">
                             <div class="row">
                                 <div class="col-md-2">
 
                                     <label for="id">Item ID</label>
-                                    <input type="text" class="form-control" id="id" name="id" placeholder="">
+                                    <input type="text" class="form-control" id="id" placeholder="">
                                 </div>
-                                <div class="col-md-8">
+                                <div class="col-md-10">
                                     <label for="product_name">Item Name</label>
-                                    <input type="text" class="form-control" id="product_name" aria-describedby="result"  name="product_name"  placeholder="">
-                                    <small id="result" class="form-text text-warning"></small>
-                                </div>
-                                <div class="col-md-2">
+                                    <input type="text" class="form-control" id="product_name" placeholder="">
 
-                                    <label for="stock_quantity">Stock QTY</label>
-                                    <input type="text" class="form-control" id="stock_quantity" name="stock_quantity" placeholder="">
                                 </div>
                             </div>
 
 
                             <label for="price">Price</label>
-                            <input type="text" class="form-control" id="price"   name="price" placeholder="">
+                            <input type="text" class="form-control" id="price" placeholder="">
                             <label for="picture_link">Image Link</label>
-                            <input type="text" class="form-control" id="picture_link"   name="picture_link" placeholder="">
+                            <input type="text" class="form-control" id="picture_link" placeholder="">
                         </div>
                         <div class="form-group">
                             <label for="department_name">Department</label>
-                            <input type="text" class="form-control" id="department_name"   name="department_name" placeholder="">
+                            <input type="text" class="form-control" id="department_name" placeholder="">
                             <label for="product_description">Item Description</label>
-                            <textarea class="form-control" id="product_description"   name="product_description" rows="3"></textarea>
+                            <textarea class="form-control" id="product_description" rows="3"></textarea>
 
                         </div>
 
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btnitemupdate btn btn-secondary" data-dismiss="modal">Close</button>
                             <button type="button" class="btnitemupdate btn btn-primary">Save changes</button>
                         </div>
 
@@ -155,7 +150,8 @@
         });
 
         $("body").on("click", ".btnitemupdate", function () {
-           
+
+            console.log($("myform").serialize());
             $.ajax({
                 url: '/setitem',
                 dataType: 'json',
@@ -163,9 +159,7 @@
                 contentType: 'application/x-www-form-urlencoded',
                 data: $("#formitemupdate").serialize(),
                 success: function (data, textStatus, jQxhr) {
-                    $("#result").text(textStatus);
-                    console.log(textStatus);
-                resetForm($("#formitemupdate"));
+                    console.log(data);
 
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
@@ -174,11 +168,7 @@
             });
         });
 
-function resetForm($form) {
-    $form.find('input:text, input:password, input:file, select, textarea').val('');
-    $form.find('input:radio, input:checkbox')
-         .removeAttr('checked').removeAttr('selected');
-}
+
 
     });
 </script>
