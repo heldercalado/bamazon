@@ -10,11 +10,11 @@ app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'static')));
 var Database = require("./db.js");
 
-// var db = new Database();
+var db = new Database();
 
 // route pages
 app.get('/', function (req, res) {
-  var db = new Database();
+  
   db.connection.query("SELECT * FROM products LIMIT 10", function (error, results, fields) {
     if (error) throw error;
     if (results.length > 0) {
@@ -38,7 +38,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/searchresults', function (req, res) {
-  var db = new Database();
+  
   var check = req.query.name;
   // console.log(check);
   if (check) {
@@ -68,7 +68,7 @@ app.get('/searchresults', function (req, res) {
   }
 });
 app.get('/department', function (req, res) {
-  var db = new Database();
+  
   var check = req.query.name;
   console.log(check);
   if (check) {
@@ -98,7 +98,7 @@ app.get('/department', function (req, res) {
   }
 });
 app.get('/itemsmanagement', function (req, res) {
-  var db = new Database();
+  
   db.connection.query('SELECT * FROM products', function (error, results, fields) {
     if (error) throw error;
     if (results.length > 0) {
@@ -111,7 +111,7 @@ app.get('/itemsmanagement', function (req, res) {
 
 });
 app.get('/getitem', function (req, res) {
-  var db = new Database();
+  
   var check = req.query.id;
   db.connection.query('SELECT * FROM products WHERE id = ?', check, function (error, results, fields) {
     if (error) throw error;
@@ -134,7 +134,7 @@ app.get('/getitem', function (req, res) {
 
 });
 app.post('/setitem', function(req, res) {
-  var db = new Database();
+  
   var item = {
     
     product_name: req.body.product_name,
@@ -161,7 +161,7 @@ console.log(sql);
   
 });
 app.post('/deleteitem', function(req, res) {
-  var db = new Database();
+  
   
   
 sql = "DELETE FROM products WHERE id =" +  req.body.id;
