@@ -15,7 +15,7 @@ var db = new Database();
 // route pages
 app.get('/', function (req, res) {
   
-  db.connection.query("SELECT * FROM products LIMIT 10", function (error, results, fields) {
+  db.connection.query("SELECT * FROM products WHERE stock_quantity > 0 LIMIT 10", function (error, results, fields) {
     if (error) throw error;
     if (results.length > 0) {
       //console.log(results);
@@ -72,7 +72,7 @@ app.get('/department', function (req, res) {
   var check = req.query.name;
   console.log(check);
   if (check) {
-    db.connection.query('SELECT * FROM products WHERE department_name LIKE ?', "%" + check + "%", function (error, results, fields) {
+    db.connection.query('SELECT * FROM products WHERE department_name LIKE ? AND stock_quantity > 0', "%" + check + "%", function (error, results, fields) {
       if (error) throw error;
       if (results.length > 0) {
         res.render('department', {
@@ -107,6 +107,21 @@ app.get('/itemsmanagement', function (req, res) {
         err: ""
       });
     }
+  });
+
+});
+app.post('/getcartid', function (req, res) {
+  
+  var obj = {
+    date_field:new Date()
+  }
+  sql ='INSERT INTO cart (date_field) values ("'+ obj.date_field + '")'
+ 
+  db.connection.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    
+    res.send(results);
+    
   });
 
 });
@@ -149,6 +164,33 @@ app.post('/setitem', function(req, res) {
 sql = "UPDATE products SET ? WHERE id =" +  req.body.id;
 console.log(sql);
   console.log(item);
+  db.connection.query(sql,[item], function (error, results, fields) {
+    if (error) throw error;
+    myres = {
+      status:"ok"
+    }
+    
+    res.json(myres);
+  });
+
+  
+});
+app.post('/additem', function(req, res) {
+  
+  var item = {
+    
+    product_name: req.body.product_name,
+    department_name: req.body.department_name,
+    price: req.body.price,
+    stock_quantity: req.body.stock_quantity,
+    picture_link: req.body.picture_link,
+    product_description: req.body.product_description
+
+  }
+  
+sql = 'INSERT INTO products SET ?';
+console.log(sql);
+console.log(item); 
   db.connection.query(sql,[item], function (error, results, fields) {
     if (error) throw error;
     myres = {

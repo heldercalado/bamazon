@@ -122,7 +122,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <a href="#" class="btn btn-primary">Add To Cart</a>
+                                    <a href="#" class="cart btn btn-primary">Add To Cart</a>
                                 </div>
                             </div>
 
@@ -168,6 +168,29 @@ $('body').on("click", ".dpt" , function(e){
     });  
 
 
+})
+
+$('body').on("click", ".cart" , function(e){
+    
+  if (localStorage.getItem("cartId")){
+
+  }else{
+    $.ajax({
+                url: '/getcartid',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: '',
+                success: function (data, textStatus, jQxhr) {
+                    
+                    console.log(data);
+                    localStorage.setItem("cartId",data.insertId);
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });  
+  }
 })
 
 

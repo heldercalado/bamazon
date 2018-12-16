@@ -21,6 +21,26 @@
 </head>
 
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">Home</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+ <li class="nav-item">
+        <a class="btn btn-success nav-link text-white"  data-toggle="modal" data-target="#modalcenteradditem">Add Item</a>
+      </li>
+
+            </ul>
+            
+        </div>
+        </form>
+        </div>
+    </nav>
+    <br>
     <div class="row">
         <div class="col-md-12">
             <table class="table" id="target" style="width:80%;">
@@ -64,7 +84,7 @@
         </div>
 
     </div>
-    <!-- Modal item input -->
+    <!-- Modal item  update -->
     <div class="modal fade" id="modalcenteritemupdate" tabindex="-1" role="dialog" aria-labelledby="modalcenteritemupdate"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -93,13 +113,13 @@
                                 <div class="col-md-2">
 
                                     <label for="stock_quantity">Stock QTY</label>
-                                    <input type="text" class="form-control" id="stock_quantity" name="stock_quantity" placeholder="">
+                                    <input type="text" class="form-control numbersonly" id="stock_quantity" name="stock_quantity" placeholder="">
                                 </div>
                             </div>
 
 
                             <label for="price">Price</label>
-                            <input type="text" class="form-control" id="price"   name="price" placeholder="">
+                            <input type="text" class="form-control numberandperiod" id="price"    name="price" placeholder="">
                             <label for="picture_link">Image Link</label>
                             <input type="text" class="form-control" id="picture_link"   name="picture_link" placeholder="">
                         </div>
@@ -122,7 +142,64 @@
             </div>
         </div>
     </div>
+ <!-- Modal new item input -->
+    <div class="modal fade" id="modalcenteradditem" tabindex="-1" role="dialog" aria-labelledby="modalcenteradditem"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">New Item Input Page</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formadditem" method="">
 
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-2">
+
+                                    <label for="id">Item ID</label>
+                                    <input type="text" class="form-control" id="id" name="id" placeholder="Auto" disabled>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="product_name">Item Name</label>
+                                    <input type="text" class="form-control" id="product_name" aria-describedby="result"  name="product_name"  placeholder="">
+                                    <small id="result" class="form-text text-warning"></small>
+                                </div>
+                                <div class="col-md-2">
+
+                                    <label for="stock_quantity">Stock QTY</label>
+                                    <input type="text" class="form-control numbersonly" id="stock_quantity" name="stock_quantity" placeholder="">
+                                </div>
+                            </div>
+
+
+                            <label for="price">Price</label>
+                            <input type="text" class="form-control numberandperiod" id="price"   name="price" placeholder="">
+                            <label for="picture_link">Image Link</label>
+                            <input type="text" class="form-control" id="picture_link"   name="picture_link" placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="department_name">Department</label>
+                            <input type="text" class="form-control" id="department_name"   name="department_name" placeholder="">
+                            <label for="product_description">Item Description</label>
+                            <textarea class="form-control" id="product_description"   name="product_description" rows="3"></textarea>
+
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btnadditem btn btn-primary">Save changes</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 <script>
     $(document).ready(function () {
@@ -164,8 +241,30 @@
                 data: $("#formitemupdate").serialize(),
                 success: function (data, textStatus, jQxhr) {
                     $("#result").text(textStatus);
+                     location.reload();
                     console.log(textStatus);
                 resetForm($("#formitemupdate"));
+
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+        });
+        $("body").on("click", ".btnadditem", function () {
+           console.log($("#formadditem").serialize());
+            $.ajax({
+                url: '/additem',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: $("#formadditem").serialize(),
+                
+                success: function (data, textStatus, jQxhr) {
+                    console.log(data);
+                     location.reload();
+                    
+                resetForm($("#formadditem"));
 
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
@@ -188,7 +287,7 @@
                 success: function (data, textStatus, jQxhr) {
                    
                     console.log(textStatus);
-                
+                location.reload();
 
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
@@ -205,6 +304,16 @@ function resetForm($form) {
     $form.find('input:radio, input:checkbox')
          .removeAttr('checked').removeAttr('selected');
 }
+
+ $('body').on('keypress', ".numberandperiod",  function (e) {
+        return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
+    });
+$('body').on('keypress', ".numbersonly",  function (e) {
+       if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+        
+        
+               return false
+    } });
 
     });
 </script>
