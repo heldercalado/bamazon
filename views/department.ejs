@@ -23,7 +23,7 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">Bamazomb</a>
+        <a class="navbar-brand" href="/">Home</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -57,73 +57,45 @@
                 </ul>
                 <br>
                 <br>
-                <div class="accordion " id="accordionExample">
-                    
-                    <div class="card nav-dark bg-dark">
-                        <div class="card-header" id="headingTwo">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo"
-                                    aria-expanded="false" aria-controls="collapseTwo">
-                                    Shopping Cart
-                                </button>
-                            </h5>
-                        </div>
-                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-                            <div class="card-body">
-                                    <ul>
-                                            <li><button type="button" class="btn btn-dark text-center">View</button></li>
-                                            <li><button type="button" class="btn btn-dark text-center">Clear</button></li>
-        
-                                    </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card nav-dark bg-dark">
-                        <div class="card-header" id="headingThree">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree"
-                                    aria-expanded="false" aria-controls="collapseThree">
-                                    Links
-                                </button>
-                            </h5>
-                        </div>
-                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
-                            <div class="card-body">
-                                Links will go here
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
         <div class="col-md-10">
-            <div class="display_page">
+          <div class="display_page">
                 <div class="row align-items-center">
                     <div class="col-">
-                       <%for (var i = 0 ; i < items.length;i++){%>
+                    
+                   
+                      <%for (var i = 0 ; i < items.length;i++){%>
                       <div class="card">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h4><%= items[i].product_name %></h4>
+                                    <h4 id="itemname<%= items[i].id %>"><%= items[i].product_name %></h4>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <img class="" src="<%= items[i].picture_link %>">
                                     <p class="card-text"><%= items[i].product_description %></p>
-                                    <p>Price: $ <%= items[i].price %></p>
+                                    <p id="itemprice<%= items[i].id %>" data-price="<%= items[i].price %>">Price: $<%= items[i].price %></p>
 
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12">
-                                    <a href="#" class="btn btn-primary">Add To Cart</a>
+                                <div class="col-md-2">
+                                    <a data-itemid="<%= items[i].id %>" class="cart btn btn-primary">Add To Cart</a>
+                                </div>
+                                <div class="col-md-2">
+                                     
+                                     <input type="text" data-maxqty="<%= items[i].stock_quantity %>" class="form-control" id="inputqtyitemid<%= items[i].id %>" placeholder="quantity">
                                 </div>
                             </div>
 
                         </div> 
                         
-                      <% }%>
+                      <% } %>
+                      
+                      
 
                     </div>
 
@@ -140,8 +112,8 @@
 $(document).ready(function () {
 
 $("#search").attr("placeholder" ,"<%= err %>");
+getCartItems();
 
-})
 
 
 $('body').on("click", ".btn-form" , function(e){
@@ -153,6 +125,136 @@ $('body').on("click", ".btn-form" , function(e){
 
 
 })
+$('body').on("click", ".dpt" , function(e){
+  
+   console.log("name="+ $(this).data("val"));
+    jQuery.get('/department', "name="+ $(this).data("val"), function (data) {
+ 	    // console.log($("#myform").serialize()) //data is the response from the backend
+    });  
+
+
+})
+
+$('body').on("click", ".cart" , function(e){
+    
+  if (localStorage.getItem("cartId")){
+      var itemId = $(this).data("itemid");
+var obj = {
+    cart_id: localStorage.getItem("cartId"),
+    product_id:itemId ,
+    product_name: $("#itemname"+itemId).text(),
+    price: $("#itemprice"+itemId).data("price"),
+    quantity:parseInt($("#inputqtyitemid"+itemId).val())
+
+  }
+
+     console.log(obj) ;    
+
+
+
+       $.ajax({
+                url: '/addtocart',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: obj,
+                success: function (data, textStatus, jQxhr) {
+                    
+                    console.log(data);
+                    location.reload();
+                   
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });  
+
+  }else{
+    $.ajax({
+                url: '/getcartid',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: '',
+                success: function (data, textStatus, jQxhr) {
+                    
+                    console.log(data);
+                    localStorage.setItem("cartId",data.insertId);
+                    $('.cart').first().click();
+                    
+
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });  
+  }
+})
+ $("body").on("click", ".deletecart", function () {
+             if (confirm("are you sure?")){
+                 var itemId = {
+                     id:localStorage.getItem("cartId"),
+                 }
+                 console.log(itemId)
+            $.ajax({
+                url: '/deletecart',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: itemId,
+                success: function (data, textStatus, jQxhr) {
+                   
+                    console.log(textStatus);
+                    localStorage.removeItem("cartId");
+                location.reload();
+
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+
+             }
+           
+        });
+function getCartItems(){
+if (localStorage.getItem("cartId")){
+
+ $.ajax({
+                url: '/getcartitems?cartid='+localStorage.getItem("cartId"),
+                dataType: 'json',
+                type: 'get',
+                contentType: 'application/x-www-form-urlencoded',
+                
+                success: function (data, textStatus, jQxhr) {
+                    $("#cartqty").html("("+data.length+")");
+                    
+                    console.log(data);
+                    loadCart(data);
+                   ;
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });  
+}
+}
+
+function loadCart(argitems){
+var target = "#targettable";
+var sumOfItem = 0;
+
+for (var i =0 ; i < argitems.length ; i++){
+var itemTotal =argitems[i].price * argitems[i].quantity;
+    $(target).append("<tr><td>"+argitems[i].product_name+"</td><td>"+argitems[i].price+"</td><td>"+argitems[i].quantity+"</td><td>"+itemTotal+"</td><td>"+"<i class='getitem far fa-edit' data-id='' data-toggle='modal' data-target='#modalcenteritemupdate'></i><span> / </span><i class='deleteitem far fa-trash-alt' data-id=''></i></td></tr>");
+}
+
+}
+
+
+
+
+});
 
 
 

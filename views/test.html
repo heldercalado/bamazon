@@ -120,57 +120,121 @@
 
 </body>
 <script>
+
     $(document).ready(function () {
-
-        console.log("<%= err %>");
-
-
-        $("body").on("click", ".getitem", function () {
-            var query = "/getitem?id=" + $(this).data("id");
-            $.ajax(query, {
-                type: 'GET',
-                dataType: 'json',
-                success: function (resp) {
-                    $("#id").val(resp.id);
-                    $("#product_name").val(resp.product_name);
-                    $("#department_name").val(resp.department_name);
-                    $("#price").val(resp.price);
-                    $("#stock_quantity").val(resp.stock_quantity);
-                    $("#picture_link").val(resp.picture_link);
-                    $("#picture_link").val(resp.picture_link);
-                    $("#product_description").val(resp.product_description);
-
-
-                },
-                error: function (req, status, err) {
-                    console.log('something went wrong', status, err);
-                }
-            });
-
-        });
-
-        $("body").on("click", ".btnitemupdate", function () {
-
-            console.log($("myform").serialize());
-            $.ajax({
-                url: '/setitem',
-                dataType: 'json',
-                type: 'post',
-                contentType: 'application/x-www-form-urlencoded',
-                data: $("#formitemupdate").serialize(),
-                success: function (data, textStatus, jQxhr) {
-                    console.log(data);
-
-                },
-                error: function (jqXhr, textStatus, errorThrown) {
-                    console.log(errorThrown);
-                }
-            });
-        });
-
-
-
-    });
-</script>
+    
+    $("#search").attr("placeholder" ,"<%= err %>");
+    getCartItems();
+    
+    
+    
+    $('body').on("click", ".btn-form" , function(e){
+      
+        $("#myform").attr("action", "/searchresults");
+        jQuery.get('/searchresults',"?"+ $("#myform").serialize(), function (data) {
+             // console.log($("#myform").serialize()) //data is the response from the backend
+        });  
+    
+    
+    })
+    $('body').on("click", ".dpt" , function(e){
+      
+       console.log("name="+ $(this).data("val"));
+        jQuery.get('/department', "name="+ $(this).data("val"), function (data) {
+             // console.log($("#myform").serialize()) //data is the response from the backend
+        });  
+    
+    
+    })
+    
+    $('body').on("click", ".cart" , function(e){
+        
+      if (localStorage.getItem("cartId")){
+          var itemId = $(this).data("itemid");
+    var obj = {
+        cart_id: localStorage.getItem("cartId"),
+        product_id:itemId ,
+        product_name: $("#itemname"+itemId).text(),
+        price: $("#itemprice"+itemId).data("price"),
+        quantity:parseInt($("#inputqtyitemid"+itemId).val())
+    
+      }
+    
+         console.log(obj) ;    
+    
+    
+    
+           $.ajax({
+                    url: '/addtocart',
+                    dataType: 'json',
+                    type: 'post',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: obj,
+                    success: function (data, textStatus, jQxhr) {
+                        
+                        console.log(data);
+                       
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });  
+    
+      }else{
+        $.ajax({
+                    url: '/getcartid',
+                    dataType: 'json',
+                    type: 'post',
+                    contentType: 'application/x-www-form-urlencoded',
+                    data: '',
+                    success: function (data, textStatus, jQxhr) {
+                        
+                        console.log(data);
+                        localStorage.setItem("cartId",data.insertId);
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });  
+      }
+    })
+    
+    function getCartItems(){
+    if (localStorage.getItem("cartId")){
+    
+     $.ajax({
+                    url: '/getcartitems?cartid='+localStorage.getItem("cartId"),
+                    dataType: 'json',
+                    type: 'get',
+                    contentType: 'application/x-www-form-urlencoded',
+                    
+                    success: function (data, textStatus, jQxhr) {
+                        
+                        console.log(data);
+                        loadCart(data);
+                       ;
+                    },
+                    error: function (jqXhr, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                    }
+                });  
+    }
+    }
+    
+    function loadCart(argitems){
+    var target = "#targettable";
+    var sumOfItem = 0;
+    
+    for (var i =0 ; i < argitems.length ; i++){
+    var itemTotal =argitems[i].price * argitems[i].quantity;
+        $(target).append("<tr><td>"+argitems[i].product_name+"</td><td>"+argitems[i].price+"</td><td>"+argitems[i].quantity+"</td><td>$"+itemTotal+"</td><td>"+"<i class='getitem far fa-edit' data-id='' data-toggle='modal' data-target='#modalcenteritemupdate'></i><span> / </span><i class='deleteitem far fa-trash-alt' data-id=''></i><"+"</td></tr>");
+    }
+    }
+    
+    })
+    
+    
+    
+    </script>
 
 </html>

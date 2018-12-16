@@ -16,6 +16,8 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
         crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP"
+        crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
     <title>Bamazon</title>
 </head>
@@ -67,15 +69,15 @@
                             <h5 class="mb-0">
                                 <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo"
                                     aria-expanded="false" aria-controls="collapseTwo">
-                                    Shopping Cart
+                                    Shopping Cart <span id="cartqty"></span>
                                 </button>
                             </h5>
                         </div>
                         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
                             <div class="card-body">
                                     <ul>
-                                            <li><button type="button" class="btn btn-dark text-center">View</button></li>
-                                            <li><button type="button" class="btn btn-dark text-center">Clear</button></li>
+                                            <li><button data-toggle="modal" data-target="#modalcentercart" type="button" class="btn btn-dark text-center" onclick="getCartItems()">View</button></li>
+                                            <li><button type="button" class="deletecart btn btn-dark text-center">Clear</button></li>
         
                                     </ul>
                             </div>
@@ -109,20 +111,24 @@
                       <div class="card">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <h4><%= items[i].product_name %></h4>
+                                    <h4 id="itemname<%= items[i].id %>"><%= items[i].product_name %></h4>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
                                     <img class="" src="<%= items[i].picture_link %>">
                                     <p class="card-text"><%= items[i].product_description %></p>
-                                    <p>Price: $ <%= items[i].price %></p>
+                                    <p id="itemprice<%= items[i].id %>" data-price="<%= items[i].price %>">Price: $<%= items[i].price %></p>
 
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12">
-                                    <a href="#" class="cart btn btn-primary">Add To Cart</a>
+                                <div class="col-md-2">
+                                    <a data-itemid="<%= items[i].id %>" class="cart btn btn-primary">Add To Cart</a>
+                                </div>
+                                <div class="col-md-2">
+                                     
+                                     <input type="text" data-maxqty="<%= items[i].stock_quantity %>" class="form-control" id="inputqtyitemid<%= items[i].id %>" placeholder="quantity">
                                 </div>
                             </div>
 
@@ -139,7 +145,34 @@
             </div>
 
         </div>
+<div class="modal fade" id="modalcentercart" tabindex="-1" role="dialog" aria-labelledby="modalcentercart"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalCenterTitle">Shopping Cart</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="cart">
+                <table class="table" id="targettable" style="width:80%;">
+                <tr>
+                    
+                    <th class="text-center">Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Edit / Delete</th>
 
+
+                </tr>
+                  </table> 
+                  <p id="carttotal"></p> 
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 <script>
@@ -147,8 +180,8 @@
 $(document).ready(function () {
 
 $("#search").attr("placeholder" ,"<%= err %>");
+getCartItems();
 
-})
 
 
 $('body').on("click", ".btn-form" , function(e){
@@ -173,6 +206,36 @@ $('body').on("click", ".dpt" , function(e){
 $('body').on("click", ".cart" , function(e){
     
   if (localStorage.getItem("cartId")){
+      var itemId = $(this).data("itemid");
+var obj = {
+    cart_id: localStorage.getItem("cartId"),
+    product_id:itemId ,
+    product_name: $("#itemname"+itemId).text(),
+    price: $("#itemprice"+itemId).data("price"),
+    quantity:parseInt($("#inputqtyitemid"+itemId).val())
+
+  }
+
+     console.log(obj) ;    
+
+
+
+       $.ajax({
+                url: '/addtocart',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: obj,
+                success: function (data, textStatus, jQxhr) {
+                    
+                    console.log(data);
+                    location.reload();
+                   
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });  
 
   }else{
     $.ajax({
@@ -185,6 +248,9 @@ $('body').on("click", ".cart" , function(e){
                     
                     console.log(data);
                     localStorage.setItem("cartId",data.insertId);
+                    $('.cart').first().click();
+                    
+
                 },
                 error: function (jqXhr, textStatus, errorThrown) {
                     console.log(errorThrown);
@@ -192,8 +258,71 @@ $('body').on("click", ".cart" , function(e){
             });  
   }
 })
+ $("body").on("click", ".deletecart", function () {
+             if (confirm("are you sure?")){
+                 var itemId = {
+                     id:localStorage.getItem("cartId"),
+                 }
+                 console.log(itemId)
+            $.ajax({
+                url: '/deletecart',
+                dataType: 'json',
+                type: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                data: itemId,
+                success: function (data, textStatus, jQxhr) {
+                   
+                    console.log(textStatus);
+                    localStorage.removeItem("cartId");
+                location.reload();
+
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+
+             }
+           
+        });
+function getCartItems(){
+if (localStorage.getItem("cartId")){
+
+ $.ajax({
+                url: '/getcartitems?cartid='+localStorage.getItem("cartId"),
+                dataType: 'json',
+                type: 'get',
+                contentType: 'application/x-www-form-urlencoded',
+                
+                success: function (data, textStatus, jQxhr) {
+                    $("#cartqty").html("("+data.length+")");
+                    
+                    console.log(data);
+                    loadCart(data);
+                   ;
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });  
+}
+}
+
+function loadCart(argitems){
+var target = "#targettable";
+var sumOfItem = 0;
+
+for (var i =0 ; i < argitems.length ; i++){
+var itemTotal =argitems[i].price * argitems[i].quantity;
+sumOfItem+=itemTotal
+    $(target).append("<tr><td>"+argitems[i].product_name+"</td><td>"+argitems[i].price+"</td><td>"+argitems[i].quantity+"</td><td>"+itemTotal+"</td><td>"+"<i class='getitem far fa-edit' data-id='' data-toggle='modal' data-target='#modalcenteritemupdate'></i><span> / </span><i class='deleteitem far fa-trash-alt' data-id=''></i></td></tr>");
+}
+$("#carttotal").text("Total: $"+sumOfItem.toFixed(2));
+}
 
 
 
+
+});
 </script>
 </html>

@@ -5,7 +5,9 @@ var path = require('path');
 var app = express();
 var bodyParser = require('body-parser');
 app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+app.use(bodyParser.urlencoded({
+  extended: true
+})); // support encoded bodies
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'static')));
 var Database = require("./db.js");
@@ -14,7 +16,7 @@ var db = new Database();
 
 // route pages
 app.get('/', function (req, res) {
-  
+
   db.connection.query("SELECT * FROM products WHERE stock_quantity > 0 LIMIT 10", function (error, results, fields) {
     if (error) throw error;
     if (results.length > 0) {
@@ -36,9 +38,23 @@ app.get('/', function (req, res) {
 
 
 });
+app.get('/getcartitems', function (req, res) {
+console.log(req.query.cartid);
+  db.connection.query("SELECT * FROM cartitems WHERE cart_id = ?",req.query.cartid, function (error, results, fields) {
+    if (error) throw error;
+    if (results.length > 0) {
+      //console.log(results);
+      res.json(results)
 
+    } 
+
+  });
+
+
+
+});
 app.get('/searchresults', function (req, res) {
-  
+
   var check = req.query.name;
   // console.log(check);
   if (check) {
@@ -68,7 +84,7 @@ app.get('/searchresults', function (req, res) {
   }
 });
 app.get('/department', function (req, res) {
-  
+
   var check = req.query.name;
   console.log(check);
   if (check) {
@@ -98,7 +114,7 @@ app.get('/department', function (req, res) {
   }
 });
 app.get('/itemsmanagement', function (req, res) {
-  
+
   db.connection.query('SELECT * FROM products', function (error, results, fields) {
     if (error) throw error;
     if (results.length > 0) {
@@ -111,22 +127,45 @@ app.get('/itemsmanagement', function (req, res) {
 
 });
 app.post('/getcartid', function (req, res) {
-  
+
   var obj = {
-    date_field:new Date()
+    date_field: new Date()
   }
-  sql ='INSERT INTO cart (date_field) values ("'+ obj.date_field + '")'
- 
+  sql = 'INSERT INTO cart (date_field) values ("' + obj.date_field + '")'
+
   db.connection.query(sql, function (error, results, fields) {
     if (error) throw error;
-    
+
     res.send(results);
-    
+
+  });
+
+});
+app.post('/addtocart', function (req, res) {
+  
+  var obj = {
+    cart_id: req.body.cart_id,
+    product_id: req.body.product_id,
+    product_name:req.body.product_name ,
+    price: req.body.price,
+    quantity: req.body.quantity
+
+  }
+  
+
+    sql = 'INSERT INTO cartitems SET ?';
+    db.connection.query(sql,[obj] ,function (error, results, fields) {
+      if (error) throw error;
+
+      res.send(results);
+
+   
+
   });
 
 });
 app.get('/getitem', function (req, res) {
-  
+
   var check = req.query.id;
   db.connection.query('SELECT * FROM products WHERE id = ?', check, function (error, results, fields) {
     if (error) throw error;
@@ -148,10 +187,10 @@ app.get('/getitem', function (req, res) {
   });
 
 });
-app.post('/setitem', function(req, res) {
-  
+app.post('/setitem', function (req, res) {
+
   var item = {
-    
+
     product_name: req.body.product_name,
     department_name: req.body.department_name,
     price: req.body.price,
@@ -160,25 +199,25 @@ app.post('/setitem', function(req, res) {
     product_description: req.body.product_description
 
   }
-  
-sql = "UPDATE products SET ? WHERE id =" +  req.body.id;
-console.log(sql);
+
+  sql = "UPDATE products SET ? WHERE id =" + req.body.id;
+  console.log(sql);
   console.log(item);
-  db.connection.query(sql,[item], function (error, results, fields) {
+  db.connection.query(sql, [item], function (error, results, fields) {
     if (error) throw error;
     myres = {
-      status:"ok"
+      status: "ok"
     }
-    
+
     res.json(myres);
   });
 
-  
+
 });
-app.post('/additem', function(req, res) {
-  
+app.post('/additem', function (req, res) {
+
   var item = {
-    
+
     product_name: req.body.product_name,
     department_name: req.body.department_name,
     price: req.body.price,
@@ -187,38 +226,66 @@ app.post('/additem', function(req, res) {
     product_description: req.body.product_description
 
   }
-  
-sql = 'INSERT INTO products SET ?';
-console.log(sql);
-console.log(item); 
-  db.connection.query(sql,[item], function (error, results, fields) {
+
+  sql = 'INSERT INTO products SET ?';
+  console.log(sql);
+  console.log(item);
+  db.connection.query(sql, [item], function (error, results, fields) {
     if (error) throw error;
     myres = {
-      status:"ok"
+      status: "ok"
     }
-    
+
     res.json(myres);
   });
 
-  
+
 });
-app.post('/deleteitem', function(req, res) {
-  
-  
-  
-sql = "DELETE FROM products WHERE id =" +  req.body.id;
-console.log(sql);
-  
+app.post('/deleteitem', function (req, res) {
+
+
+
+  sql = "DELETE FROM products WHERE id =" + req.body.id;
+  console.log(sql);
+
   db.connection.query(sql, function (error, results, fields) {
     if (error) throw error;
     myres = {
-      status:"ok"
+      status: "ok"
     }
-    
+
     res.json(myres);
   });
 
+
+});
+app.post('/deletecart', function (req, res) {
+
+
+
+  sql = "DELETE FROM cart WHERE id =" + req.body.id;
+  console.log(sql);
+
+  db.connection.query(sql, function (error, results, fields) {
+    if (error) throw error;
+
+    sql = "DELETE FROM cartitems WHERE cart_id =" + req.body.id;
+    db.connection.query(sql, function (error, results, fields) {
+      if (error) throw error;
+    
+      myres = {
+        status: "ok"
+      }
   
+      res.json(myres);
+    })
+
+
+   
+
+  });
+
+
 });
 // what port to run server on
 app.listen(process.env.PORT || 3000, function () {
